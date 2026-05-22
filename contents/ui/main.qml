@@ -18,6 +18,11 @@ KWin.TabBoxSwitcher {
     id: tabBox
     currentIndex: compactListView.currentIndex
 
+    readonly property bool opaqueBackground: true
+    readonly property int iconSize: Kirigami.Units.iconSizes.huge      // medium=32, large=48, huge=64
+    readonly property int fontPixelSize: 18                            // default theme is ~13
+    readonly property int maxWidth: 700                                // px; captions longer than this get elided
+
     /**
     * Returns the caption with adjustments for minimized items.
     * @param caption the original caption
@@ -35,6 +40,7 @@ KWin.TabBoxSwitcher {
         id: textMetrics
         property string longestCaption: tabBox.model.longestCaption()
         text: itemCaption(longestCaption, true)
+        font.pixelSize: tabBox.fontPixelSize
     }
 
     onVisibleChanged: {
@@ -58,9 +64,9 @@ KWin.TabBoxSwitcher {
         mainItem: Item {
             id: dialogMainItem
 
-            property int optimalWidth: textMetrics.width + Kirigami.Units.iconSizes.medium + 2 * Kirigami.Units.smallSpacing + hoverItem.margins.right + hoverItem.margins.left
+            property int optimalWidth: textMetrics.width + tabBox.iconSize + 2 * Kirigami.Units.smallSpacing + hoverItem.margins.right + hoverItem.margins.left
             property int optimalHeight: compactListView.rowHeight * compactListView.count
-            width: Math.min(Math.max(tabBox.screenGeometry.width * 0.2, optimalWidth), tabBox.screenGeometry.width * 0.8)
+            width: Math.min(optimalWidth, tabBox.maxWidth)
             height: Math.min(optimalHeight, tabBox.screenGeometry.height * 0.8)
             focus: true
 
@@ -72,10 +78,19 @@ KWin.TabBoxSwitcher {
                 visible: false
             }
 
+            Kirigami.Theme.colorSet: Kirigami.Theme.View
+            Kirigami.Theme.inherit: false
+            Rectangle {
+                anchors.fill: parent
+                color: Kirigami.Theme.backgroundColor
+                visible: tabBox.opaqueBackground
+                z: -1
+            }
+
             ListView {
                 id: compactListView
 
-                property int rowHeight: Math.max(Kirigami.Units.iconSizes.medium, textMetrics.height) + hoverItem.margins.top * 2 + hoverItem.margins.bottom * 2
+                property int rowHeight: Math.max(tabBox.iconSize, textMetrics.height) + hoverItem.margins.top * 2 + hoverItem.margins.bottom * 2
 
                 anchors.fill: parent
                 clip: true
@@ -92,8 +107,8 @@ KWin.TabBoxSwitcher {
                     Kirigami.Icon {
                         id: iconItem
                         source: model.icon
-                        Layout.preferredWidth: Kirigami.Units.iconSizes.medium
-                        Layout.preferredHeight: Kirigami.Units.iconSizes.medium
+                        Layout.preferredWidth: tabBox.iconSize
+                        Layout.preferredHeight: tabBox.iconSize
                         Layout.leftMargin: hoverItem.margins.left * 2
                         Layout.topMargin: hoverItem.margins.top
                         Layout.bottomMargin: hoverItem.margins.bottom
@@ -105,6 +120,7 @@ KWin.TabBoxSwitcher {
                         text: itemCaption(caption, minimized)
                         textFormat: Text.PlainText  // backported from Plasma 6: https://invent.kde.org/plasma/kdeplasma-addons/-/commit/05f7dc7d02ec47edea543912eb4e75126e229069
                         elide: Text.ElideMiddle
+                        font.pixelSize: tabBox.fontPixelSize
                         Layout.fillWidth: true
                         Layout.topMargin: hoverItem.margins.top
                         Layout.bottomMargin: hoverItem.margins.bottom
@@ -114,6 +130,7 @@ KWin.TabBoxSwitcher {
                         text: desktopName
                         elide: Text.ElideMiddle
                         visible: tabBox.allDesktops
+                        font.pixelSize: tabBox.fontPixelSize
                         Layout.rightMargin: hoverItem.margins.right * 2
                         Layout.topMargin: hoverItem.margins.top
                         Layout.bottomMargin: hoverItem.margins.bottom

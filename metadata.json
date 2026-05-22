@@ -1,0 +1,18 @@
+{
+    "KPackageStructure": "KWin/WindowSwitcher",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "perso@hack-libre.org",
+                "Name": "Mélanie Chauvel (ariasuni)"
+            }
+        ],
+        "Description": "A modern and informative window switcher layout",
+        "Description[fr]": "Une disposition du sélecteur de fenêtres moderne et informative",
+        "Id": "modern_informative",
+        "License": "GPL",
+        "Name": "Modern Informative",
+        "Name[fr]": "Informatif moderne",
+        "Version": "1.0"
+    }
+}

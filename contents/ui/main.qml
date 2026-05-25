@@ -21,7 +21,7 @@ KWin.TabBoxSwitcher {
     readonly property bool opaqueBackground: true
     readonly property int iconSize: Kirigami.Units.iconSizes.huge      // medium=32, large=48, huge=64
     readonly property int fontPixelSize: 18                            // default theme is ~13
-    readonly property int maxWidth: 700                                // px; captions longer than this get elided
+    readonly property int maxWidth: 1000                               // px; captions longer than this get elided
     readonly property bool showCloseButton: true                       // X button to close the window from the switcher
 
     /**

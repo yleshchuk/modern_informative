@@ -22,6 +22,7 @@ KWin.TabBoxSwitcher {
     readonly property int iconSize: Kirigami.Units.iconSizes.huge      // medium=32, large=48, huge=64
     readonly property int fontPixelSize: 18                            // default theme is ~13
     readonly property int maxWidth: 700                                // px; captions longer than this get elided
+    readonly property bool showCloseButton: true                       // X button to close the window from the switcher
 
     /**
     * Returns the caption with adjustments for minimized items.
@@ -64,7 +65,8 @@ KWin.TabBoxSwitcher {
         mainItem: Item {
             id: dialogMainItem
 
-            property int optimalWidth: textMetrics.width + tabBox.iconSize + 2 * Kirigami.Units.smallSpacing + hoverItem.margins.right + hoverItem.margins.left
+            property int closeButtonSlot: tabBox.showCloseButton ? Math.round(tabBox.iconSize * 0.6) + 2 * Kirigami.Units.mediumSpacing : 0
+            property int optimalWidth: textMetrics.width + tabBox.iconSize + closeButtonSlot + 2 * Kirigami.Units.smallSpacing + hoverItem.margins.right + hoverItem.margins.left
             property int optimalHeight: compactListView.rowHeight * compactListView.count
             width: Math.min(optimalWidth, tabBox.maxWidth)
             height: Math.min(optimalHeight, tabBox.screenGeometry.height * 0.8)
@@ -97,12 +99,17 @@ KWin.TabBoxSwitcher {
 
                 model: tabBox.model
                 delegate: RowLayout {
+                    id: row
 
                     width: compactListView.width
                     height: compactListView.rowHeight
                     opacity: minimized ? 0.6 : 1.0
 
                     spacing: 2 * Kirigami.Units.mediumSpacing
+
+                    HoverHandler {
+                        id: rowHover
+                    }
 
                     Kirigami.Icon {
                         id: iconItem
@@ -131,9 +138,29 @@ KWin.TabBoxSwitcher {
                         elide: Text.ElideMiddle
                         visible: tabBox.allDesktops
                         font.pixelSize: tabBox.fontPixelSize
+                        Layout.topMargin: hoverItem.margins.top
+                        Layout.bottomMargin: hoverItem.margins.bottom
+                    }
+                    PlasmaComponents3.ToolButton {
+                        id: closeButton
+                        readonly property bool slotEnabled: tabBox.showCloseButton
+                            && model.closeable
+                            && typeof tabBox.model.close !== "undefined"
+                        icon.name: "window-close-symbolic"
+                        icon.width: Math.round(tabBox.iconSize * 0.5)
+                        icon.height: Math.round(tabBox.iconSize * 0.5)
+                        display: PlasmaComponents3.AbstractButton.IconOnly
+                        flat: true
+                        visible: slotEnabled
+                        // Hide the icon when not hovered, but keep the slot to preserve the right margin
+                        opacity: (rowHover.hovered || closeButton.hovered || index === compactListView.currentIndex) ? 1.0 : 0.0
+                        enabled: opacity > 0
+                        Layout.preferredWidth: Math.round(tabBox.iconSize * 0.6)
+                        Layout.preferredHeight: Math.round(tabBox.iconSize * 0.6)
                         Layout.rightMargin: hoverItem.margins.right * 2
                         Layout.topMargin: hoverItem.margins.top
                         Layout.bottomMargin: hoverItem.margins.bottom
+                        onClicked: tabBox.model.close(index)
                     }
                     TapHandler {
                         onSingleTapped: {
